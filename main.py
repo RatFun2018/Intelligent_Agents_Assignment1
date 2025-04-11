@@ -12,5 +12,3 @@ if num2 == num1 + 1:
 
 #Comment on branch
 
-def GeneticAgo():
-    ...
