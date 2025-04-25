@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import random as rd
 E1={"Hours": 10,"Skill_lvl":4,"Skills":['A','B','C'],"Assigned Tasks":{}}
-E1={"Hours": 12,"Skill_lvl":2,"Skills":['B','C'],"Assigned Tasks":{}}
+E2={"Hours": 12,"Skill_lvl":2,"Skills":['B','C'],"Assigned Tasks":{}}
 Employees = {'E1':E1,'E2':E2}
 T1={"Estimated Time":2,"Difficulty":2,"Deadline":5,"Skills":'A'}
 T2={"Estimated Time":3,"Difficulty":2,"Deadline":7,"Skills":'C'}
