@@ -3,48 +3,66 @@ import pandas as pd
 import random as rd
 E1={"Hours": 10,"Skill_lvl":4,"Skills":['A','B','C'],"Assigned Tasks":{}}
 E2={"Hours": 12,"Skill_lvl":2,"Skills":['B','C'],"Assigned Tasks":{}}
-Employees = {'E1':E1,'E2':E2}
+Employees = [E1,E2]
 T1={"Estimated Time":2,"Difficulty":2,"Deadline":5,"Skills":'A'}
 T2={"Estimated Time":3,"Difficulty":2,"Deadline":7,"Skills":'C'}
 T3={"Estimated Time":4,"Difficulty":2,"Deadline":4,"Skills":'B'}
-Tasks = {'T1':T1,'T2':T2,'T3':T3}
+Tasks = [T1,T2,T3]
 class Particle:
   def __init__(self,Employees,Tasks):
     self.Employees= Employees
     self.Tasks = Tasks
+    
     self.cost = 0
-    self.mutate()
+    #Solution matrix and velocity matrix to determine the change in the solution 
+    self.solution_matrix = [[ rd.randint(0,1) for _ in range(len(self.Tasks))] for _ in range(len(self.Employees))]
+    self.solution_velocity_matrix = [[rd.randint(0,1) for _ in range(len(self.Tasks))] for _ in range(len(self.Employees))]
 
+    self._translate_solution()
 
-  def mutate(self):
-    new_Employees = self.Employees
-    for T in self.Tasks:
-      td = self.Tasks[T]
-      choice = rd.choice(list(self.Employees.values()))
-      choice['Assigned Tasks'].update({T:td})
-      #for E in self.Employees.values():
-        #if td['Skills'] in E['Skills'] and td['Estimated Time'] < E['Hours'] and td['Difficulty'] <= E['Skill_lvl']:
-          #shortlist.append(E)
-        #choice = rd.randint(0,len()-1)
-        #shortlist[choice]['Assigned Tasks'].append(T)
-        #shortlist[choice]['Hours'] -= td['Estimated Time']
-    for E in new_Employees.values():
+  def _translate_solution(self):
+    self.Employees_Assigned = self.Employees
+    employee_idx = 0
+    for E in self.solution_matrix:
+      task_idx = 0
+      for T in E: 
+        print(T)
+        if T == 1:
+          print(f'task_idx: {task_idx}')
+          taskname = 'T' + str(task_idx)
+          self.Employees_Assigned[employee_idx]['Assigned Tasks'].update({taskname:self.Tasks[task_idx]})
+        task_idx +=1
+      employee_idx +=1
+
+    for E in self.Employees:
       sorted_tasks = dict(sorted(E['Assigned Tasks'].items(),key=lambda x: (x[1]['Deadline'],x[1]['Estimated Time'])))
       E['Assigned Tasks'] = sorted_tasks
 
-    self.Assigned_Employees = new_Employees
     self.fitness()
 
+  def mutate(self):
+    for k in range(len(self.solution_velocity_matrix)):
+      for j in range(len(self.solution_velocity_matrix[k])):
+        self.solution_matrix[k][j] = self.solution_matrix[k][j] ^ self.solution_velocity_matrix[k][j]
+
+    
+    self._translate_solution()
+    
+
   def output(self):
-    for E in self.Employees.values():
+    for E in self.Employees:
       print(E)
+    print(f'Solution Matrix: {self.solution_matrix}\n')
+    print(f'Velocity Matrix: {self.solution_velocity_matrix}\n')
+    print(f'Cost: {self.cost}')
 
   def fitness(self):
     newcost = 0
-    for E in self.Assigned_Employees.values():
+    for E in self.Employees:
       cumualitive_tasktime = 0
       not_skill = 0
       skilldiff =0
+      over_Deadline = 0
       for T in E['Assigned Tasks']:
         cumualitive_tasktime += E['Assigned Tasks'][T]['Estimated Time']
         if E['Assigned Tasks'][T]['Skills'] not in E['Skills']:
@@ -71,6 +89,8 @@ class Particle_Swarm_Optimiser:
     self.n_dimensions = n_dimensions
     self.bounds = bounds
     self.w = w
+    self.c1 = c1
+    self.c2 = c2
 
   def next(self):
     ...
@@ -78,4 +98,5 @@ class Particle_Swarm_Optimiser:
 
 p = Particle(Employees,Tasks)
 p.output()
-p.fitness()
+p.mutate()
+p.output()
