@@ -29,12 +29,14 @@ class Particle:
     self._translate_solution()
 
   def _translate_solution(self):
-    self.Employees_Assigned = self.Employees.copy()
-      
+    self.Employees_Assigned =self.Employees
+    for f in self.Employees_Assigned:
+      f['Assigned Tasks'] = {}
     task_idx = 0
     for T in self.solution_matrix:
       employee_idx = 0
-      for E in T: 
+      for E in T:
+        
         if E == 1:
           #print(f'task_idx: {task_idx}')
           taskname = 'T' + str(task_idx)
@@ -106,7 +108,7 @@ class Particle:
 
   def output(self):
     E_idx = 0
-    for E in self.Employees:
+    for E in self.Employees_Assigned:
       e_name = 'E' + str(E_idx)
       print(f'{e_name}: {E}\n')
       E_idx += 1
@@ -125,10 +127,10 @@ class Particle:
       for T in E['Assigned Tasks']:
         cumualitive_tasktime += E['Assigned Tasks'][T]['Estimated Time']
         if E['Assigned Tasks'][T]['Skills'] not in E['Skills']:
-          not_skill += 1
+          not_skill += 10
 
         if E['Assigned Tasks'][T]['Difficulty'] > E['Skill_lvl']:
-          skilldiff += 1
+          skilldiff += 10
 
         over_Deadline = max(cumualitive_tasktime-E['Assigned Tasks'][T]['Deadline'],0)
       #print(f'cumulative Task Time: {cumualitive_tasktime}')
@@ -170,7 +172,7 @@ class Particle_Swarm_Optimiser:
 
 
   def generate_data(self):
-    _Employees,_Tasks = DS.Generate_data(['A','B','C','D','E'],3,5)
+    _Employees,_Tasks = DS.Generate_data(['A','B','C','D','E'],10,25)
     for n in range(self.n_particles):
       new_particle = Particle(_Employees,_Tasks)
       self.particles.append(new_particle)
@@ -205,6 +207,6 @@ class Particle_Swarm_Optimiser:
 
 
 
-Swarm = Particle_Swarm_Optimiser(5,0.7,2,2,n_iter=5)
+Swarm = Particle_Swarm_Optimiser(25,0.3,2,3,n_iter=25)
 Swarm.plot_cost()
 print(f'gBest = {Swarm.gBest}')
