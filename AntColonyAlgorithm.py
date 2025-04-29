@@ -15,6 +15,23 @@ class Ant():
             c = rd.randint(0,len(T)-1)
             T[c] = 1
 
+    def _translate_solution(self):
+        self.Employees_Assigned =self.Employees
+        for f in self.Employees_Assigned:
+            f['Assigned Tasks'] = {}
+        task_idx = 0
+        for T in self.solution_matrix:
+            employee_idx = 0
+            for E in T:
+        
+                if E == 1:
+                    #print(f'task_idx: {task_idx}')
+                    taskname = 'T' + str(task_idx)
+                    self.Employees_Assigned[employee_idx]['Assigned Tasks'].update({taskname:self.Tasks[task_idx]})
+            #print(f'Task{task_idx} Assigned to Employee{employee_idx}')
+                employee_idx +=1
+            task_idx +=1
+
     def fitness(self):
         newcost = 0
     
@@ -39,6 +56,17 @@ class Ant():
             self.pBest = self.solution_matrix
         self.cost = newcost
 
+    def update(self,pheremone_probability):
+        selection_rd = rd.random
+        for i in range(len(pheremone_probability)):
+            cumulative_prob = 0 
+            j =0 
+            while cumulative_prob < selection_rd:
+                cumulative_prob += pheremone_probability[i][j]
+                j += 1 
+            self.solution_matrix[i] = [0 * len(self.Employees)]
+            self.solution_matrix[i][j] = 1
+                
 
 class AntColonyOptimser():
     def __init__(self,n_ants,a,evaporation,pheromone):
@@ -68,4 +96,7 @@ class AntColonyOptimser():
                 p2 = (1-self.evapaporation)*p2
     
     def update_pheremone(self): 
-        ...       
+        for p1 in range(len(self.pheromone_array)):
+            for p2 in range(len(self.pheromone_array[p1])): 
+                for ants in self.ants: 
+                    p2 += ants.solution_matrix[p1][p2]*self.evapaporation*ants.cost     
