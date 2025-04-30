@@ -65,7 +65,12 @@ class Ant():
                 cumulative_prob += pheremone_probability[i][j]
                 j += 1 
             self.solution_matrix[i] = [0 * len(self.Employees)]
-            self.solution_matrix[i][j] = 1
+            self.solution_matrix[i][j] = 1 
+    
+    def output(self):
+        for E in self.Employees_Assigned:
+            print(E)
+        print(f'Cost: {self.cost}')
                 
 
 class AntColonyOptimser():
@@ -75,11 +80,12 @@ class AntColonyOptimser():
         self.evapaporation = evaporation 
         self.pheromones = pheromone
         self.pheromone_array = []
-        for n in n_ants:
-            newant = Ant()
+        _employees, _tasks  = DS.Generate_data(['A','B','C','D','E'],10,15)
+        for n in range(n_ants):
+            newant = Ant(_employees,_tasks)
             self.ants.append(newant)
         
-        self.sol_shape = self.ants[0].solution_matrix.shape
+        self.sol_shape = [len(self.ants[0].solution_matrix),len(self.ants[0].solution_matrix[0])]
 
         self.pheromone_array = [[1 * self.sol_shape[1]] for _ in range(self.sol_shape[0])]
     
@@ -99,7 +105,13 @@ class AntColonyOptimser():
         for p1 in range(len(self.pheromone_array)):
             for p2 in range(len(self.pheromone_array[p1])): 
                 for ants in self.ants: 
-                    p2 += ants.solution_matrix[p1][p2]*self.evapaporation*ants.cost     
+                    p2 += ants.solution_matrix[p1][p2]*self.evapaporation*ants.cost 
+
+    def next(self):
+        self.calc_probability()
+        for A in self.ants: 
+            A.update(self.pheromone_array)
+
 
 
 A = AntColonyOptimser(3,1,0.2,0.02)
