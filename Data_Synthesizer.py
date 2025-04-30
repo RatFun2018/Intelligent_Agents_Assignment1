@@ -2,6 +2,11 @@ import numpy
 import random as rd
 
 def Generate_data(availableskills,numemployees=10,numTasks=15):
+    '''
+    Generates synthetic data to test Optimiser functions 
+    Input: list of available skills eg.['A','B','C'], number of employees to generate, number of Tasks to generate 
+    Output: List of Employees where each employee is a dictionary containing "Hours",'Skill_lvl",Skkls & List of Tasks 
+    '''
     Employees = [] 
     Tasks = []
     emnum = 1

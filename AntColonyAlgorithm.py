@@ -100,3 +100,6 @@ class AntColonyOptimser():
             for p2 in range(len(self.pheromone_array[p1])): 
                 for ants in self.ants: 
                     p2 += ants.solution_matrix[p1][p2]*self.evapaporation*ants.cost     
+
+
+A = AntColonyOptimser(3,1,0.2,0.02)
