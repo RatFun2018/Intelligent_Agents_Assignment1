@@ -122,7 +122,7 @@ class AntColonyOptimser():
         for p1 in range(len(self.pheromone_array)):
             for p2 in range(len(self.pheromone_array[p1])): 
                 for ants in self.ants: 
-                    self.pheromone_array[p1][p2] += ants.solution_matrix[p1][p2]*self.evapaporation*ants.cost 
+                    self.pheromone_array[p1][p2] += ants.solution_matrix[p1][p2]*(self.evapaporation/ants.cost)
 
     def next(self):
         self.calc_probability()
