@@ -15,7 +15,7 @@ class Ant():
         for T in self.solution_matrix:
             c = rd.randint(0,len(T)-1)
             T[c] = 1
-        print(self.solution_matrix)
+        #print(self.solution_matrix)
         self._translate_solution()
 
     def _translate_solution(self):
@@ -43,18 +43,17 @@ class Ant():
             not_skill = 0
             skilldiff =0
             over_Deadline = 0
-            print(E)
             for T in E['Assigned Tasks']:
-                print(f'Tasks:{T}')
+                #print(f'Tasks:{T}')
                 cumualitive_tasktime += E['Assigned Tasks'][T]['Estimated Time']
                 if E['Assigned Tasks'][T]['Skills'] not in E['Skills']:
-                    not_skill += 10
+                    not_skill += 5
 
                 if E['Assigned Tasks'][T]['Difficulty'] > E['Skill_lvl']:
-                    skilldiff += 10
+                    skilldiff += 5
 
                 over_Deadline = max(cumualitive_tasktime-E['Assigned Tasks'][T]['Deadline'],0)
-            print(f'cumulative Task Time: {cumualitive_tasktime}')
+            #print(f'cumulative Task Time: {cumualitive_tasktime}')
             overtime = max(cumualitive_tasktime-E['Hours'],0)
             newcost += (0.25 * not_skill + 0.25 * skilldiff + 0.25 * over_Deadline + 0.25 * overtime)
         if newcost < self.cost:
@@ -63,14 +62,18 @@ class Ant():
 
     def update(self,pheremone_probability):
         selection_rd = rd.random()
+        
         for i in range(len(pheremone_probability)):
-            cumulative_prob = 0 
-            j=0 
-            while cumulative_prob < selection_rd:
-                cumulative_prob += pheremone_probability[i][j]
-                j += 1 
-            self.solution_matrix[i] = [0 * len(self.Employees)]
-            self.solution_matrix[i][j-1] = 1 
+            self.solution_matrix[i] = [0 for _ in  range(len(self.Employees))]
+            cumulative_prob = 0.0 
+            for j in range(len(pheremone_probability[i])): 
+                prob = pheremone_probability[i][j]  
+                cumulative_prob += prob 
+                if selection_rd <= cumulative_prob:
+                    out = j 
+            self.solution_matrix[i][out] = 1
+        
+         
     
     def output(self):
         for E in self.Employees_Assigned:
@@ -79,11 +82,11 @@ class Ant():
                 
 
 class AntColonyOptimser():
-    def __init__(self,n_ants,a,evaporation,pheromone,patience=5):
+    def __init__(self,n_ants,a,evaporation,pheromone,employees,tasks,patience=5):
         self.patience = patience
         self.patience_count = 0
         
-        self.a = a 
+        self.a = float(a) 
         
         self.evapaporation = evaporation 
         self.pheromones = pheromone
@@ -92,25 +95,26 @@ class AntColonyOptimser():
         self.pheromone_array = []
         self.BestCost = float('inf')
         self.BestSolution = None
-        _employees, _tasks  = DS.Generate_data(['A','B','C','D','E'],10,15)
         for n in range(n_ants):
-            newant = Ant(_employees,_tasks)
-            newant.output()
+            newant = Ant(employees,tasks)
+            #newant.output()
             self.ants.append(newant)
         
         self.sol_shape = [len(self.ants[0].solution_matrix),len(self.ants[0].solution_matrix[0])]
-
-        self.pheromone_array = [[1 * self.sol_shape[0]] for _ in range(self.sol_shape[1])]
-
+        print(f'Solution Shape {self.sol_shape}')
+        self.pheromone_array = [[float(1) for _ in range(self.sol_shape[1])] for _ in range(self.sol_shape[0])]
+        print(f'Phaeremone array: {self.pheromone_array}')
         while self.patience_count < self.patience:
             self.next()
+            print('='*50)
+        print("Best Solution:")
         self.BestSolution.output()
 
     def calc_probability(self):
         self.proability_array = []
         for n in self.pheromone_array: 
             k_tau = sum(n)
-            L2 = [x/k_tau for x in n]
+            L2 = [(np.float_power(x,self.a))/k_tau for x in n]
             self.proability_array.append(L2)
             
     def evaporate(self):
@@ -122,20 +126,33 @@ class AntColonyOptimser():
         for p1 in range(len(self.pheromone_array)):
             for p2 in range(len(self.pheromone_array[p1])): 
                 for ants in self.ants: 
-                    self.pheromone_array[p1][p2] += ants.solution_matrix[p1][p2]*(self.evapaporation/ants.cost)
+                    #print(ants.solution_matrix)
+                    self.pheromone_array[p1][p2] += ants.solution_matrix[p1][p2]*self.pheromones*ants.cost
 
     def next(self):
         self.calc_probability()
-        for A in self.ants: 
-            A.update(self.pheromone_array)
+        newBestCost = float('inf')
+        for A in self.ants:
+            print(f'Ant Solution Matrix: {A.solution_matrix}')
+            print(f'Probability Array: {self.proability_array}') 
+            A.update(self.proability_array)
             self.update_pheremone()
+            print(f'After Pheremone update {self.pheromone_array}\n')
             self.evaporate()
-            if A.cost <= self.BestCost:
-                self.BestCost = A.cost
-                self.BestSolution = A 
-                self.cost_history.append(self.BestCost)
-            else:
-                self.patience_count += 1
+            print(f'After evaporation: {self.pheromone_array}\n')
+            if A.cost <= newBestCost:
+                newBestCost = A.cost
+                newBestSolution = A 
+        
+        if newBestCost < self.BestCost: 
+            self.BestCost = newBestCost
+            self.BestSolution = newBestSolution
+            
+        else :
+            self.patience_count +=1 
+            print("No improvement")
+            print(f"Patience {self.patience_count}/{self.patience}")
+        self.cost_history.append(newBestCost)
 
     def plot_cost(self):
         plt.plot(self.cost_history,'b-',linewidth=3,label ='Best Fitness')
@@ -145,6 +162,6 @@ class AntColonyOptimser():
 
 
 
-
-A = AntColonyOptimser(3,1,0.8,0.02)
+Ant_employees, Ant_Tasks = DS.Generate_data(['A','B','C','D','E'],3,5)
+A = AntColonyOptimser(10,1,0.8,0.02,Ant_employees,Ant_Tasks)
 A.plot_cost()
