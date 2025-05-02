@@ -265,7 +265,7 @@ class Particle_Swarm_Optimiser:
     plt.subplot(3,2,4) 
     plt.plot(self.memoryuseHist,'g-')
     plt.xlabel('Iterations')
-    plt.ylabel('Memory Used Mb',color='tab:green')
+    plt.ylabel('Memory Used kb',color='tab:green')
     plt.subplot(3,2,5)
     plt.plot(self.process_timeHist,'r-')
     plt.xlabel('Iterations')
