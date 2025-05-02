@@ -225,6 +225,7 @@ class AntColonyOptimser():
         plt.show()
 
 
-Ant_employees, Ant_Tasks = DS.Generate_data(['A','B','C','D','E'],10,25)
-A = AntColonyOptimser(5,1,0.8,0.02,Ant_employees,Ant_Tasks,patience=100)
-A.plot_cost()
+# Ant_employees, Ant_Tasks = DS.Generate_data(['A','B','C','D','E'],10,25)
+# A = AntColonyOptimser(5,1,0.8,0.02,Ant_employees,Ant_Tasks,patience=100)
+
+# A.plot_cost()

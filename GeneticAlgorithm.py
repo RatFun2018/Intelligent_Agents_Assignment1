@@ -120,6 +120,7 @@ class GeneticAlgorithm:
         self.memory_usage = []  # Track memory usage per generation
         self.constraint_violations = []  # Track constraint violations per generation
         self.elapsed_times = []  # Track elapsed time per generation
+        
 
     def evolve(self):
         for gen in range(self.generations):
@@ -208,27 +209,30 @@ class GeneticAlgorithm:
 
         plt.grid(True)
 
-# Importing the Data Synthesizer and generating synthetic data
-GA_Employees, GA_Tasks = DS.Generate_data(['A','B','C','D','E'], 5, 10)
 
-# Set up the GA for 500 generations
-GA = GeneticAlgorithm(GA_Employees, GA_Tasks, pop_size=20, generations=500, mutation_rate=0.2)
 
-# Evolve the GA to calculate results
-GA.evolve()
 
-# Now the GA is evolved, so you can safely print the best assignment and best cost
-print(f"\nBest assignment (task → employee): {GA.best.assignment}")
-print(f"Best cost: {GA.best.cost:.2f}")
+# # Importing the Data Synthesizer and generating synthetic data
+# GA_Employees, GA_Tasks = DS.Generate_data(['A','B','C','D','E'], 5, 10)
 
-# Plotting the results
-plt.figure(figsize=(18, 6))  # Increase figure size to fit all 3 plots side by side
-GA.plot_cost()  # Solution Quality (Objective Function)
-GA.plot_memory_usage()  # Computational Efficiency (Memory Usage)
-GA.plot_constraint_violations()  # Constraint Satisfaction (Feasibility) and Elapsed Time
+# # Set up the GA for 500 generations
+# GA = GeneticAlgorithm(GA_Employees, GA_Tasks, pop_size=20, generations=500, mutation_rate=0.2)
 
-# Adjusting spacing between subplots
-plt.subplots_adjust(wspace=0.3)  # Increase space between subplots to avoid overlap
+# # Evolve the GA to calculate results
+# GA.evolve()
 
-plt.tight_layout()  # Ensures everything fits inside the plot
-plt.show()
+# # Now the GA is evolved, so you can safely print the best assignment and best cost
+# print(f"\nBest assignment (task → employee): {GA.best.assignment}")
+# print(f"Best cost: {GA.best.cost:.2f}")
+
+# # Plotting the results
+# plt.figure(figsize=(18, 6))  # Increase figure size to fit all 3 plots side by side
+# GA.plot_cost()  # Solution Quality (Objective Function)
+# GA.plot_memory_usage()  # Computational Efficiency (Memory Usage)
+# GA.plot_constraint_violations()  # Constraint Satisfaction (Feasibility) and Elapsed Time
+
+# # Adjusting spacing between subplots
+# plt.subplots_adjust(wspace=0.3)  # Increase space between subplots to avoid overlap
+
+# plt.tight_layout()  # Ensures everything fits inside the plot
+# plt.show()
