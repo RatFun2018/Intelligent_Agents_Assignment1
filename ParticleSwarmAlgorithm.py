@@ -273,7 +273,7 @@ class Particle_Swarm_Optimiser:
     plt.show()
 
 
-E,T = DS.Generate_data(['A','B','C','D','E','F','G'],10,18)
-Swarm = Particle_Swarm_Optimiser(25,0.3,2,3,E,T,n_iter=500)
-Swarm.plot_cost()
-print(f'gBest = {Swarm.gBest}')
+# E,T = DS.Generate_data(['A','B','C','D','E','F','G'],10,18)
+# Swarm = Particle_Swarm_Optimiser(25,0.3,2,3,E,T,n_iter=500)
+# Swarm.plot_cost()
+# print(f'gBest = {Swarm.gBest}')
