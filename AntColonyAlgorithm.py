@@ -4,6 +4,8 @@ import pandas as pd
 import random as rd
 import math
 import matplotlib.pyplot as plt 
+import psutil
+import time
 import copy
 
 class Ant():
