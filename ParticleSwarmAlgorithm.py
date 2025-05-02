@@ -223,12 +223,12 @@ class Particle_Swarm_Optimiser:
 
     for i in range(self.n_iter): #Runs the optmiser the specified amount of runs 
       print(f' Step {i}')
-      print('='*20)
+      #print('='*20)
       self.next()
       self.gBestCostHistory.append(self.gBest_cost) #logging for best global cost for every iteration 
       #if self.check_termination():
         #break
-      print('='*20)
+      #print('='*20)
 
 
   def generate_particles(self,Employees,Tasks):
@@ -269,7 +269,7 @@ class Particle_Swarm_Optimiser:
     for k in self.particles:
       #k.output()
       k.update_particle() #updating the 'position' of the particle which means possibly changing the solution of  the particle based on its velocity values 
-      print(f'cost: {k.cost}\n')
+      #print(f'cost: {k.cost}\n')
 
       #Variables are added to get the cumulative values for each valuation over all partilces in the iteration 
       avg_total_violation += sum([k.skill_lvl_violation,k.skill_violation,k.deadline_violation,k.overtime_violation])
@@ -282,7 +282,7 @@ class Particle_Swarm_Optimiser:
       if k.cost <= self.gBest_cost: #Checks if the current particles cost is the best cost value seen so far 
         self.gBest_cost = k.cost
         self.gBest = k.pBest
-        print(f'New gBest: {self.gBest}')
+        #print(f'New gBest: {self.gBest}')
     self.gBestHistory.append(self.gBest) #Logging for Change in best cost over iteration 
     #print(avg_total_violation)
 
@@ -307,9 +307,9 @@ class Particle_Swarm_Optimiser:
     #Time taken and memory usage metric tracking and logging 
     end_time = time.time()
     end_mem =  self.process.memory_info().rss / 1024
-    mem_used = end_mem - start_mem
+    #mem_used = end_mem - start_mem
     iteration_time  = end_time - start_time
-    self.memoryuseHist.append(mem_used)
+    self.memoryuseHist.append(end_mem)
     self.process_timeHist.append(iteration_time)
   
   def plot_cost(self):

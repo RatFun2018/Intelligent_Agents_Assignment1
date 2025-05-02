@@ -198,9 +198,10 @@ class AntColonyOptimser():
             #print('='*50)
 
         for n in range(n_iter):
+            print(f'step{n}')
             self.next()
-            print('='*50)
-        print("Best Solution:")
+            #print('='*50)
+        #print("Best Solution:")
         self.BestSolution.output()
 
     def calc_probability(self): #Calculating proability matrix from pheremone matrix 
@@ -317,7 +318,7 @@ class AntColonyOptimser():
         plt.show()
 
 
-Ant_employees, Ant_Tasks = DS.Generate_data(['A','B','C','D','E'],10,25)
-A = AntColonyOptimser(5,0.8,0.02,Ant_employees,Ant_Tasks,n_iter=100)
+# Ant_employees, Ant_Tasks = DS.Generate_data(['A','B','C','D','E'],10,25)
+# A = AntColonyOptimser(5,0.8,0.02,Ant_employees,Ant_Tasks,n_iter=100)
 
-A.plot_cost()
+# A.plot_cost()
