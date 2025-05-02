@@ -64,9 +64,9 @@ class Ant():
         self.cost = newcost
 
     def update(self,pheremone_probability):
-        selection_rd = rd.random()
         
         for i in range(len(pheremone_probability)):
+            selection_rd = rd.random()
             self.solution_matrix[i] = [0 for _ in  range(len(self.Employees))]
             probs = pheremone_probability[i]
             cumulative_probs = 0.0 
@@ -90,7 +90,7 @@ class Ant():
                 
 
 class AntColonyOptimser():
-    def __init__(self,n_ants,a,evaporation,pheromone,employees,tasks,patience=5):
+    def __init__(self,n_ants,a,evaporation,pheromone,employees,tasks,patience=10):
         self.patience = patience
         self.patience_count = 0
         
@@ -141,12 +141,13 @@ class AntColonyOptimser():
         self.calc_probability()
         newBestCost = float('inf')
         for A in self.ants:
-            print(f'Ant Solution Matrix: {A.solution_matrix}')
+            print(f'Ant Solution Matrix Before: {A.solution_matrix}')
             print(f'Probability Array: {self.proability_array}') 
             A.update(self.proability_array)
             if A.cost <= newBestCost:
                 newBestCost = A.cost
                 newBestSolution = A 
+            print(f'Ant Solution Matrix After: {A.solution_matrix}')
         self.update_pheremone()
         print(f'After Pheremone update {self.pheromone_array}\n')
         self.evaporate()
@@ -156,6 +157,7 @@ class AntColonyOptimser():
         if newBestCost < self.BestCost: 
             self.BestCost = newBestCost
             self.BestSolution = newBestSolution
+            self.patience_count = 0 
         else :  
             self.patience_count +=1 
             print("No improvement")
@@ -171,6 +173,6 @@ class AntColonyOptimser():
 
 
 
-Ant_employees, Ant_Tasks = DS.Generate_data(['A','B','C','D','E'],5,8)
+Ant_employees, Ant_Tasks = DS.Generate_data(['A','B','C','D','E'],10,25)
 A = AntColonyOptimser(5,1,0.8,0.02,Ant_employees,Ant_Tasks)
 A.plot_cost()
