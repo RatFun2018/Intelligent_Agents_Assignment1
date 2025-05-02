@@ -4,15 +4,10 @@ import random as rd
 import Data_Synthesizer as DS 
 import math
 import matplotlib.pyplot as plt 
+import psutil
+import time
+import os
 
-E1={"Hours": 10,"Skill_lvl":3,"Skills":['A','C'],"Assigned Tasks":{}}
-E2={"Hours": 8,"Skill_lvl":2,"Skills":['B','C'],"Assigned Tasks":{}}
-E3={"Hours": 12,"Skill_lvl":3,"Skills":['C','B'],"Assigned Tasks":{}}
-Employees = [E1,E2,E3]
-T1={"Estimated Time":2,"Difficulty":2,"Deadline":5,"Skills":'A'}
-T2={"Estimated Time":3,"Difficulty":2,"Deadline":7,"Skills":'C'}
-T3={"Estimated Time":4,"Difficulty":2,"Deadline":4,"Skills":'B'}
-Tasks = [T1,T2,T3]
 
 class Particle:
   def __init__(self,Employees,Tasks):
@@ -178,7 +173,9 @@ class Particle_Swarm_Optimiser:
     self.skill_lvl_violationHist = [] 
     self.deadline_violationHist = []
     self.overtime_violationHist = []
-
+    self.process_timeHist = []
+    self.memoryuseHist = []
+    self.process = psutil.Process(os.getpid())
     self.generate_particles(Employees,Tasks)
 
     for i in range(self.n_iter):
@@ -209,6 +206,8 @@ class Particle_Swarm_Optimiser:
     avg_skill_lvl_violation = 0 
     avg_deadline_violation = 0 
     avg_overtime_violation = 0
+    start_time = time.time()
+    start_mem = self.process.memory_info().rss / 1024
     print(avg_total_violation) 
     for k in self.particles:
       #k.output()
@@ -239,29 +238,42 @@ class Particle_Swarm_Optimiser:
     
     for j in self.particles:
       j.update_velocity(self.gBest,self.w,self.c1,self.c2) 
+    
+    end_time = time.time()
+    end_mem =  self.process.memory_info().rss / 1024
+    mem_used = end_mem - start_mem
+    iteration_time  = end_time - start_time
+    self.memoryuseHist.append(mem_used)
+    self.process_timeHist.append(iteration_time)
   
   def plot_cost(self):
-    plt.subplot(3,1,1)
+    plt.subplot(3,2,1)
     plt.plot(self.gBestCostHistory,'b-',linewidth=3,label ='Best Fitness')
     plt.xlabel('Iteration')
     plt.ylabel('Cost')
-    plt.subplot(3,1,2)
+    plt.subplot(3,2,2)
     plt.plot(self.averagetotalViolatioHist,'r-',linewidth=3,label='total avg Violations')
     plt.xlabel('Iterations')
     plt.ylabel("# of violations")
-    plt.subplot(3,1,3)
+    plt.subplot(3,2,3)
     plt.plot(self.skill_lvl_violationHist,'o-',linewidth= 2,label='skill lvl violations')
     plt.plot(self.skill_violationHist,'g-',linewidth = 2, label= 'Skill Violations')
     plt.plot(self.deadline_violationHist,'r-',linewidth = 2 , label='Deadline Violation')
     plt.plot(self.overtime_violationHist,'b-',linewidth = 2 , label = 'Overtime Violation')
     plt.xlabel('Iterations')
     plt.ylabel('# of violations')
+    plt.subplot(3,2,4) 
+    plt.plot(self.memoryuseHist,'g-')
+    plt.xlabel('Iterations')
+    plt.ylabel('Memory Used Mb',color='tab:green')
+    plt.subplot(3,2,5)
+    plt.plot(self.process_timeHist,'r-')
+    plt.xlabel('Iterations')
+    plt.ylabel('Time Used',color='tab:red')
     plt.show()
 
 
-# E,T = DS.Generate_data(['A','B','C','D','E','F','G'],10,18)
-# Swarm = Particle_Swarm_Optimiser(25,0.3,2,3,E,T,n_iter=100)
-
-
-# Swarm.plot_cost()
-# print(f'gBest = {Swarm.gBest}')
+E,T = DS.Generate_data(['A','B','C','D','E','F','G'],10,18)
+Swarm = Particle_Swarm_Optimiser(25,0.3,2,3,E,T,n_iter=500)
+Swarm.plot_cost()
+print(f'gBest = {Swarm.gBest}')
