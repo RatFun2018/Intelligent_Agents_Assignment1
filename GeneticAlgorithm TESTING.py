@@ -1,11 +1,3 @@
-#Code for The Genetic Algor
-'''
-Genetic Algorithm (GA):
-– Encoding: Represent each solution as a vector where each element indicates the employee assigned to a specific task.
-– Operators: Use crossover and mutation to evolve the solution population.
-– Fitness: Evaluate solutions based on penalties for any constraint violations
-
-'''
 import numpy as np
 import pandas as pd
 import random as rd
@@ -13,8 +5,8 @@ import Data_Synthesizer as DS
 import math
 import matplotlib.pyplot as plt
 import copy
-import time
 import psutil
+import time
 
 # Penalty Weights (from Assignment Brief)
 ALPHA = 0.20  # Overload penalty
@@ -26,13 +18,13 @@ SIGMA = 0.20  # Unique assignment penalty (not used in this encoding)
 # GAIndividual: Represents one solution
 class GAIndividual:
     def __init__(self, employees, tasks):
-        self.employees = copy.deepcopy(employees)
+        self.employees = employees
         self.tasks = tasks
         self.assignment = [rd.randint(0, len(employees) - 1) for _ in range(len(tasks))]
         self.cost = self.calculate_cost()
 
     def calculate_cost(self):
-        employees = copy.deepcopy(self.employees)
+        employees = self.employees
         cost = 0
 
         # Reset task assignments
@@ -95,13 +87,14 @@ class GeneticAlgorithm:
         self.mutation_rate = mutation_rate
         self.best = min(self.population, key=lambda x: x.cost)
         self.best_costs = []
-        self.runtime = []  # Track runtime per generation
         self.memory_usage = []  # Track memory usage per generation
         self.constraint_violations = []  # Track constraint violations per generation
+        self.elapsed_times = []  # Track elapsed time per generation
 
     def evolve(self):
         for gen in range(self.generations):
             start_time = time.time()  # Start time for the current generation
+            # Track absolute memory usage at the start of the generation
             start_memory = psutil.Process().memory_info().rss / 1024  # Memory usage in KB at the start
 
             new_population = []
@@ -127,65 +120,85 @@ class GeneticAlgorithm:
             # Track performance for the current generation
             self.best_costs.append(self.best.cost)
 
-            # Track computational efficiency for the current generation
-            end_time = time.time()  # End time for the current generation
-            elapsed_time = end_time - start_time  # Time taken for this generation
-            current_memory_usage = (psutil.Process().memory_info().rss / 1024) - start_memory  # Memory in KB
-            self.runtime.append(elapsed_time)
-            self.memory_usage.append(current_memory_usage)
+            # Track memory usage for the current generation
+            current_memory_usage = psutil.Process().memory_info().rss / 1024  # Absolute memory usage (in KB)
+            self.memory_usage.append(current_memory_usage)  # Record memory usage for this generation
 
             # Track constraint satisfaction (total penalty)
             total_violations = sum([ind.cost for ind in self.population])  # Sum of penalties for all individuals
             self.constraint_violations.append(total_violations)
+
+            # Track elapsed time for the current generation
+            end_time = time.time()  # End time for the current generation
+            elapsed_time = end_time - start_time  # Time taken for this generation
+            self.elapsed_times.append(elapsed_time)
 
             print(f"Generation {gen + 1} - Best Cost: {self.best.cost:.2f}")
 
     def tournament_selection(self, k=3):
         return min(rd.sample(self.population, k), key=lambda x: x.cost)
 
+    # Plotting Solution Quality (Optimality) - Objective Function (Total Penalty)
     def plot_cost(self):
+        plt.subplot(1, 3, 1)  # Row 1, Column 1
         plt.plot(self.best_costs, color='blue', linewidth=2)
         plt.xlabel('Generation')
-        plt.ylabel('Best Cost')
-        plt.title('GA Convergence (Solution Quality)')
+        plt.ylabel('Objective (Cost) Function Value (Total Penalty)')
+        plt.title('Solution Quality (Optimality)')
         plt.grid(True)
-        plt.show()
 
-    def plot_runtime(self):
-        plt.plot(self.runtime, color='green', linewidth=2)
-        plt.xlabel('Generation')
-        plt.ylabel('Runtime (seconds)')
-        plt.title('Computational Efficiency (Runtime)')
-        plt.grid(True)
-        plt.show()
-
+    # Plotting Computational Efficiency (Memory Usage)
     def plot_memory_usage(self):
-        plt.plot(self.memory_usage, color='orange', linewidth=2)
+        plt.subplot(1, 3, 2)  # Row 1, Column 2
+        plt.plot(self.memory_usage, color='orange', linewidth=2)  # Track memory usage every generation
         plt.xlabel('Generation')
         plt.ylabel('Memory Usage (KB)')
         plt.title('Computational Efficiency (Memory Usage)')
         plt.grid(True)
-        plt.show()
 
+    # Plotting Constraint Satisfaction (Feasibility) and Elapsed Time (with dual-axis)
     def plot_constraint_violations(self):
-        plt.plot(self.constraint_violations, color='red', linewidth=2)
-        plt.xlabel('Generation')
-        plt.ylabel('Total Constraint Violations')
-        plt.title('Constraint Satisfaction (Feasibility)')
+        plt.subplot(1, 3, 3)  # Row 1, Column 3
+        ax1 = plt.gca()  # Get the current axis for the plot
+
+        # Plot Constraint Violations (Primary Y-axis)
+        ax1.plot(range(0, self.generations, 10), self.constraint_violations[::10], color='red', linewidth=2)  # Downsample every 10th generation
+        ax1.set_xlabel('Generation')
+        ax1.set_ylabel('Total Constraint Violations/Generation', color='red')
+        ax1.tick_params(axis='y', labelcolor='red')
+
+        # Create a second Y-axis for Elapsed Time
+        ax2 = ax1.twinx()
+        ax2.plot(range(0, self.generations, 10), self.elapsed_times[::10], color='green', linewidth=2)  # Downsample every 10th generation
+        ax2.set_ylabel('Elapsed Time/Generation (seconds)', color='green')
+        ax2.tick_params(axis='y', labelcolor='green')
+
+        # Adding title for Elapsed Time axis (Green)
+        ax2.set_title('Constraint Satisfaction (Feasibility) and Elapsed Time Over Generations')
+
         plt.grid(True)
-        plt.show()
 
+# Importing the Data Synthesizer and generating synthetic data
+GA_Employees, GA_Tasks = DS.Generate_data(['A','B','C','D','E'], 5, 10)
 
-# Run Genetic Algorithm
-GA_Employees, GA_Tasks = DS.Generate_data(['A','B','C','D','E'],5,10)
-GA = GeneticAlgorithm(GA_Employees, GA_Tasks, pop_size=20, generations=25, mutation_rate=0.2)
+# Set up the GA for 500 generations
+GA = GeneticAlgorithm(GA_Employees, GA_Tasks, pop_size=20, generations=500, mutation_rate=0.2)
+
+# Evolve the GA to calculate results
 GA.evolve()
 
+# Now the GA is evolved, so you can safely print the best assignment and best cost
 print(f"\nBest assignment (task → employee): {GA.best.assignment}")
 print(f"Best cost: {GA.best.cost:.2f}")
 
 # Plotting the results
+plt.figure(figsize=(18, 6))  # Increase figure size to fit all 3 plots side by side
 GA.plot_cost()  # Solution Quality (Objective Function)
-GA.plot_runtime()  # Computational Efficiency (Runtime)
 GA.plot_memory_usage()  # Computational Efficiency (Memory Usage)
-GA.plot_constraint_violations()  # Constraint Satisfaction (Feasibility)
+GA.plot_constraint_violations()  # Constraint Satisfaction (Feasibility) and Elapsed Time
+
+# Adjusting spacing between subplots
+plt.subplots_adjust(wspace=0.3)  # Increase space between subplots to avoid overlap
+
+plt.tight_layout()  # Ensures everything fits inside the plot
+plt.show()
