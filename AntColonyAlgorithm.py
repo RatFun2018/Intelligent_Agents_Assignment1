@@ -151,7 +151,7 @@ class AntColonyOptimser():
     tasks: list type object containing task information 
 
     a: value used in the probability calculation for simplcity set as 1 
-    patience: number of iterations without improvements to wait for before stopping 
+    
 
     '''
     def __init__(self,n_ants,evaporation,pheromone,employees,tasks,n_iter=50,a=1 ):
@@ -275,9 +275,9 @@ class AntColonyOptimser():
             self.patience_count = 0 
         else :  
             self.patience_count +=1 
-            print("No improvement")
-            print(f"Patience {self.patience_count}/{self.patience}")
-            self.cost_history.append(self.BestCost)
+            #print("No improvement")
+            #print(f"Patience {self.patience_count}/{self.patience}")
+        self.cost_history.append(self.BestCost)
         
         end_time = time.time()
         end_mem =  self.process.memory_info().rss / 1024
@@ -317,7 +317,7 @@ class AntColonyOptimser():
         plt.show()
 
 
-# Ant_employees, Ant_Tasks = DS.Generate_data(['A','B','C','D','E'],10,25)
-# A = AntColonyOptimser(5,1,0.8,0.02,Ant_employees,Ant_Tasks,patience=100)
+Ant_employees, Ant_Tasks = DS.Generate_data(['A','B','C','D','E'],10,25)
+A = AntColonyOptimser(5,0.8,0.02,Ant_employees,Ant_Tasks,n_iter=100)
 
-# A.plot_cost()
+A.plot_cost()
