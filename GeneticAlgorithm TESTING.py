@@ -6,7 +6,6 @@ Genetic Algorithm (GA):
 – Fitness: Evaluate solutions based on penalties for any constraint violations
 
 '''
-
 import numpy as np
 import pandas as pd
 import random as rd
@@ -14,29 +13,8 @@ import Data_Synthesizer as DS
 import math
 import matplotlib.pyplot as plt
 import copy
-
-# #Sample Employee & Task Data from Assignment Brief
-# E1 = {"Hours": 10, "Skill_lvl": 4, "Skills": ['A', 'C'], "Assigned Tasks": {}}
-# E2 = {"Hours": 12, "Skill_lvl": 6, "Skills": ['A', 'B', 'C'], "Assigned Tasks": {}}
-# E3 = {"Hours": 8, "Skill_lvl": 3, "Skills": ['A'], "Assigned Tasks": {}}
-# E4 = {"Hours": 15, "Skill_lvl": 7, "Skills": ['B', 'C'], "Assigned Tasks": {}}
-# E5 = {"Hours": 9, "Skill_lvl": 5, "Skills": ['A', 'C'], "Assigned Tasks": {}}
-
-# Employees = [E1, E2, E3, E4, E5]
-
-# T1 = {"Estimated Time": 4, "Difficulty": 3, "Deadline": 8, "Skills": 'A'}
-# T2 = {"Estimated Time": 6, "Difficulty": 5, "Deadline": 12, "Skills": 'B'}
-# T3 = {"Estimated Time": 2, "Difficulty": 2, "Deadline": 6, "Skills": 'A'}
-# T4 = {"Estimated Time": 5, "Difficulty": 4, "Deadline": 10, "Skills": 'C'}
-# T5 = {"Estimated Time": 3, "Difficulty": 1, "Deadline": 7, "Skills": 'A'}
-# T6 = {"Estimated Time": 8, "Difficulty": 6, "Deadline": 15, "Skills": 'B'}
-# T7 = {"Estimated Time": 4, "Difficulty": 3, "Deadline": 9, "Skills": 'C'}
-# T8 = {"Estimated Time": 7, "Difficulty": 5, "Deadline": 14, "Skills": 'B'}
-# T9 = {"Estimated Time": 2, "Difficulty": 2, "Deadline": 5, "Skills": 'A'}
-# T10 = {"Estimated Time": 6, "Difficulty": 4, "Deadline": 11, "Skills": 'C'}
-
-# Tasks = [T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
-
+import time
+import psutil
 
 # Penalty Weights (from Assignment Brief)
 ALPHA = 0.20  # Overload penalty
@@ -117,9 +95,15 @@ class GeneticAlgorithm:
         self.mutation_rate = mutation_rate
         self.best = min(self.population, key=lambda x: x.cost)
         self.best_costs = []
+        self.runtime = []  # Track runtime per generation
+        self.memory_usage = []  # Track memory usage per generation
+        self.constraint_violations = []  # Track constraint violations per generation
 
     def evolve(self):
         for gen in range(self.generations):
+            start_time = time.time()  # Start time for the current generation
+            start_memory = psutil.Process().memory_info().rss / 1024  # Memory usage in KB at the start
+
             new_population = []
             self.population.sort(key=lambda x: x.cost)
 
@@ -140,7 +124,20 @@ class GeneticAlgorithm:
             if current_best.cost < self.best.cost:
                 self.best = current_best
 
+            # Track performance for the current generation
             self.best_costs.append(self.best.cost)
+
+            # Track computational efficiency for the current generation
+            end_time = time.time()  # End time for the current generation
+            elapsed_time = end_time - start_time  # Time taken for this generation
+            current_memory_usage = (psutil.Process().memory_info().rss / 1024) - start_memory  # Memory in KB
+            self.runtime.append(elapsed_time)
+            self.memory_usage.append(current_memory_usage)
+
+            # Track constraint satisfaction (total penalty)
+            total_violations = sum([ind.cost for ind in self.population])  # Sum of penalties for all individuals
+            self.constraint_violations.append(total_violations)
+
             print(f"Generation {gen + 1} - Best Cost: {self.best.cost:.2f}")
 
     def tournament_selection(self, k=3):
@@ -150,20 +147,45 @@ class GeneticAlgorithm:
         plt.plot(self.best_costs, color='blue', linewidth=2)
         plt.xlabel('Generation')
         plt.ylabel('Best Cost')
-        plt.title('GA Convergence')
+        plt.title('GA Convergence (Solution Quality)')
+        plt.grid(True)
+        plt.show()
+
+    def plot_runtime(self):
+        plt.plot(self.runtime, color='green', linewidth=2)
+        plt.xlabel('Generation')
+        plt.ylabel('Runtime (seconds)')
+        plt.title('Computational Efficiency (Runtime)')
+        plt.grid(True)
+        plt.show()
+
+    def plot_memory_usage(self):
+        plt.plot(self.memory_usage, color='orange', linewidth=2)
+        plt.xlabel('Generation')
+        plt.ylabel('Memory Usage (KB)')
+        plt.title('Computational Efficiency (Memory Usage)')
+        plt.grid(True)
+        plt.show()
+
+    def plot_constraint_violations(self):
+        plt.plot(self.constraint_violations, color='red', linewidth=2)
+        plt.xlabel('Generation')
+        plt.ylabel('Total Constraint Violations')
+        plt.title('Constraint Satisfaction (Feasibility)')
         plt.grid(True)
         plt.show()
 
 
-GA_Employees, GA_Tasks = DS.Generate_data(['A','B','C','D','E'],5,10)
-
-
 # Run Genetic Algorithm
+GA_Employees, GA_Tasks = DS.Generate_data(['A','B','C','D','E'],5,10)
 GA = GeneticAlgorithm(GA_Employees, GA_Tasks, pop_size=20, generations=25, mutation_rate=0.2)
 GA.evolve()
+
 print(f"\nBest assignment (task → employee): {GA.best.assignment}")
 print(f"Best cost: {GA.best.cost:.2f}")
 
-GA.plot_cost()
-
-
+# Plotting the results
+GA.plot_cost()  # Solution Quality (Objective Function)
+GA.plot_runtime()  # Computational Efficiency (Runtime)
+GA.plot_memory_usage()  # Computational Efficiency (Memory Usage)
+GA.plot_constraint_violations()  # Constraint Satisfaction (Feasibility)
