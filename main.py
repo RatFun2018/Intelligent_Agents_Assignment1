@@ -12,27 +12,9 @@ if __name__ == "__main__":
     
 
 
-    # Set up the GA for 500 generations
+
     GeneticAlgorithm = GA.GeneticAlgorithm(Employees, Tasks, pop_size=20, generations=500, mutation_rate=0.2)
-    # Evolve the GA to calculate results
-    GeneticAlgorithm.evolve()
-
-    # Now the GA is evolved, so you can safely print the best assignment and best cost
-    print(f"\nBest assignment (task → employee): {GeneticAlgorithm.best.assignment}")
-    print(f"Best cost: {GeneticAlgorithm.best.cost:.2f}")
-
-    # Plotting the results
-    plt.figure(figsize=(18, 6))  # Increase figure size to fit all 3 plots side by side
-    GeneticAlgorithm.plot_cost()  # Solution Quality (Objective Function)
-    GeneticAlgorithm.plot_memory_usage()  # Computational Efficiency (Memory Usage)
-    GeneticAlgorithm.plot_constraint_violations()  # Constraint Satisfaction (Feasibility) and Elapsed Time
-
-    # Adjusting spacing between subplots
-    plt.subplots_adjust(wspace=0.3)  # Increase space between subplots to avoid overlap
-
-    plt.tight_layout()  # Ensures everything fits inside the plot
-    plt.show()
-
+    GeneticAlgorithm.plot_cost()  # Plot all three performance evaluations
 
 
     PSOAlgorithm = PSO.Particle_Swarm_Optimiser(25,0.3,2,3,Employees,Tasks,n_iter=500)
