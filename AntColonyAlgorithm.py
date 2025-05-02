@@ -15,6 +15,7 @@ class Ant():
         self.skill_lvl_violation = 0 
         self.skill_violation = 0 
         self.overtime_violation = 0 
+        self.deadline_violation = 0 
         for T in self.solution_matrix:
             c = rd.randint(0,len(T)-1)
             T[c] = 1
@@ -40,7 +41,10 @@ class Ant():
 
     def fitness(self):
         newcost = 0
-    
+        self.skill_lvl_violation = 0 
+        self.skill_violation = 0 
+        self.overtime_violation = 0 
+        self.deadline_violation = 0 
         for E in self.Employees_Assigned:
             cumualitive_tasktime = 0
             not_skill = 0
@@ -51,13 +55,19 @@ class Ant():
                 cumualitive_tasktime += E['Assigned Tasks'][T]['Estimated Time']
                 if E['Assigned Tasks'][T]['Skills'] not in E['Skills']:
                     not_skill += 1
+                    self.skill_violation += 1 
 
                 if E['Assigned Tasks'][T]['Difficulty'] > E['Skill_lvl']:
                     skilldiff += 1
+                    self.skill_lvl_violation += 1 
 
                 over_Deadline = max(cumualitive_tasktime-E['Assigned Tasks'][T]['Deadline'],0)
+                if over_Deadline != 0: 
+                    self.deadline_violation += 1 
             #print(f'cumulative Task Time: {cumualitive_tasktime}')
             overtime = max(cumualitive_tasktime-E['Hours'],0)
+            if overtime != 0: 
+                self.overtime_violation += 1 
             newcost += (0.25 * not_skill + 0.25 * skilldiff + 0.25 * over_Deadline + 0.25 * overtime)
         if newcost < self.cost:
             self.pBest = self.solution_matrix
@@ -101,6 +111,11 @@ class AntColonyOptimser():
         self.ants = []
         self.cost_history = []
         self.pheromone_array = []
+        self.averagetotalViolatioHist = []
+        self.skill_violationHist = []
+        self.skill_lvl_violationHist = [] 
+        self.deadline_violationHist = []
+        self.overtime_violationHist = []
         self.BestCost = float('inf')
         self.BestSolution = None
         for n in range(n_ants):
@@ -140,10 +155,22 @@ class AntColonyOptimser():
     def next(self):
         self.calc_probability()
         newBestCost = float('inf')
+        avg_total_violation = 0 
+        avg_skill_violation = 0 
+        avg_skill_lvl_violation = 0 
+        avg_deadline_violation = 0 
+        avg_overtime_violation = 0
         for A in self.ants:
             print(f'Ant Solution Matrix Before: {A.solution_matrix}')
             print(f'Probability Array: {self.proability_array}') 
             A.update(self.proability_array)
+
+            avg_total_violation += sum([A.skill_lvl_violation,A.skill_violation,A.deadline_violation,A.overtime_violation])
+            avg_skill_lvl_violation += A.skill_lvl_violation
+            avg_skill_violation += A.skill_violation 
+            avg_deadline_violation += A.deadline_violation 
+            avg_overtime_violation += A.overtime_violation 
+
             if A.cost <= newBestCost:
                 newBestCost = A.cost
                 newBestSolution = A 
@@ -152,7 +179,19 @@ class AntColonyOptimser():
         print(f'After Pheremone update {self.pheromone_array}\n')
         self.evaporate()
         print(f'After evaporation: {self.pheromone_array}\n')
-            
+
+
+        avg_total_violation = avg_total_violation/len(self.ants) 
+        avg_skill_lvl_violation = avg_skill_lvl_violation/len(self.ants)
+        avg_skill_violation = avg_skill_violation/len(self.ants) 
+        avg_deadline_violation = avg_deadline_violation/len(self.ants) 
+        avg_overtime_violation = avg_overtime_violation/len(self.ants) 
+
+        self.averagetotalViolatioHist.append(avg_total_violation) 
+        self.skill_lvl_violationHist.append(avg_skill_lvl_violation)
+        self.skill_violationHist.append(avg_skill_violation) 
+        self.deadline_violationHist.append(avg_deadline_violation)
+        self.overtime_violationHist.append(avg_overtime_violation)
         
         if newBestCost < self.BestCost: 
             self.BestCost = newBestCost
@@ -166,13 +205,24 @@ class AntColonyOptimser():
         
 
     def plot_cost(self):
+        plt.subplot(3,1,1)
         plt.plot(self.cost_history,'b-',linewidth=3,label ='Best Fitness')
         plt.xlabel('Iteration')
         plt.ylabel('Cost')
+        plt.subplot(3,1,2)
+        plt.plot(self.averagetotalViolatioHist,'r-',linewidth=3,label='total avg Violations')
+        plt.xlabel('Iterations')
+        plt.ylabel("# of violations")
+        plt.subplot(3,1,3)
+        plt.plot(self.skill_lvl_violationHist,'o-',linewidth= 2,label='skill lvl violations')
+        plt.plot(self.skill_violationHist,'g-',linewidth = 2, label= 'Skill Violations')
+        plt.plot(self.deadline_violationHist,'r-',linewidth = 2 , label='Deadline Violation')
+        plt.plot(self.overtime_violationHist,'b-',linewidth = 2 , label = 'Overtime Violation')
+        plt.xlabel('Iterations')
+        plt.ylabel('# of violations')
         plt.show()
 
 
-
 Ant_employees, Ant_Tasks = DS.Generate_data(['A','B','C','D','E'],10,25)
-A = AntColonyOptimser(5,1,0.8,0.02,Ant_employees,Ant_Tasks)
+A = AntColonyOptimser(5,1,0.8,0.02,Ant_employees,Ant_Tasks,patience=100)
 A.plot_cost()

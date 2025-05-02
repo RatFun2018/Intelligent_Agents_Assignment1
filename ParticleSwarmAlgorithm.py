@@ -17,7 +17,10 @@ class Particle:
   def __init__(self,Employees,Tasks):
     self.Employees= Employees
     self.Tasks = Tasks
-    
+    self.skill_lvl_violation = 0
+    self.skill_violation =  0
+    self.overtime_violation = 0
+    self.deadline_violation = 0 
     self.cost = float("inf")
     #Solution matrix and velocity matrix to determine the change in the solution 
     self.solution_matrix = [[ 0 for _ in range(len(self.Employees))] for _ in range(len(self.Tasks))]
@@ -30,6 +33,10 @@ class Particle:
 
   def _translate_solution(self):
     self.Employees_Assigned =self.Employees
+    self.skill_lvl_violation = 0
+    self.skill_violation =  0
+    self.overtime_violation = 0
+    self.deadline_violation = 0
     for f in self.Employees_Assigned:
       f['Assigned Tasks'] = {}
     task_idx = 0
@@ -127,15 +134,22 @@ class Particle:
       for T in E['Assigned Tasks']:
         cumualitive_tasktime += E['Assigned Tasks'][T]['Estimated Time']
         if E['Assigned Tasks'][T]['Skills'] not in E['Skills']:
-          not_skill += 10
+          not_skill += 1
 
         if E['Assigned Tasks'][T]['Difficulty'] > E['Skill_lvl']:
-          skilldiff += 10
+          skilldiff += 1
 
         over_Deadline = max(cumualitive_tasktime-E['Assigned Tasks'][T]['Deadline'],0)
+        if over_Deadline != 0: 
+          self.deadline_violation += 1 
       #print(f'cumulative Task Time: {cumualitive_tasktime}')
       overtime = max(cumualitive_tasktime-E['Hours'],0)
+      if overtime != 0: 
+        self.overtime_violation +=1 
       newcost += (0.25 * not_skill + 0.25 * skilldiff + 0.25 * over_Deadline + 0.25 * overtime)
+      self.skill_lvl_violation = skilldiff 
+      self.skill_violation = not_skill 
+      
     if newcost < self.cost:
       self.pBest = self.solution_matrix
     self.cost = newcost
@@ -146,7 +160,7 @@ class Particle:
 
 
 class Particle_Swarm_Optimiser:
-  def __init__(self, n_particles, w, c1, c2,n_iter=10,patience=3):
+  def __init__(self, n_particles, w, c1, c2,Employees,Tasks,n_iter=10,patience=3):
     self.n_particles = n_particles
     self.particles = []
     self.patience = patience
@@ -158,8 +172,13 @@ class Particle_Swarm_Optimiser:
     self.gBest_cost = float('inf')
     self.gBestHistory = []
     self.gBestCostHistory = []
+    self.averagetotalViolatioHist = []
+    self.skill_violationHist = []
+    self.skill_lvl_violationHist = [] 
+    self.deadline_violationHist = []
+    self.overtime_violationHist = []
 
-    self.generate_data()
+    self.generate_particles(Employees,Tasks)
 
     for i in range(self.n_iter):
       print(f' Step {i}')
@@ -171,10 +190,9 @@ class Particle_Swarm_Optimiser:
       print('='*20)
 
 
-  def generate_data(self):
-    _Employees,_Tasks = DS.Generate_data(['A','B','C','D','E'],10,25)
+  def generate_particles(self,Employees,Tasks):
     for n in range(self.n_particles):
-      new_particle = Particle(_Employees,_Tasks)
+      new_particle = Particle(Employees,Tasks)
       self.particles.append(new_particle)
   
   def check_termination(self):
@@ -185,28 +203,62 @@ class Particle_Swarm_Optimiser:
 
 
   def next(self):
-    
+    avg_total_violation = 0 
+    avg_skill_violation = 0 
+    avg_skill_lvl_violation = 0 
+    avg_deadline_violation = 0 
+    avg_overtime_violation = 0
+    print(avg_total_violation) 
     for k in self.particles:
-      k.output()
+      #k.output()
       k.update_particle()
       print(f'cost: {k.cost}\n')
+      avg_total_violation += sum([k.skill_lvl_violation,k.skill_violation,k.deadline_violation,k.overtime_violation])
+      avg_skill_lvl_violation += k.skill_lvl_violation
+      avg_skill_violation += k.skill_violation 
+      avg_deadline_violation += k.deadline_violation 
+      avg_overtime_violation += k.overtime_violation 
       if k.cost <= self.gBest_cost:
         self.gBest_cost = k.cost
         self.gBest = k.pBest
         print(f'New gBest: {self.gBest}')
     self.gBestHistory.append(self.gBest)
+    print(avg_total_violation)
+    avg_total_violation = avg_total_violation/len(self.particles) 
+    avg_skill_lvl_violation = avg_skill_lvl_violation/len(self.particles)
+    avg_skill_violation = avg_skill_violation/len(self.particles) 
+    avg_deadline_violation = avg_deadline_violation/len(self.particles) 
+    avg_overtime_violation = avg_overtime_violation/len(self.particles) 
+
+    self.averagetotalViolatioHist.append(avg_total_violation) 
+    self.skill_lvl_violationHist.append(avg_skill_lvl_violation)
+    self.skill_violationHist.append(avg_skill_violation) 
+    self.deadline_violationHist.append(avg_deadline_violation)
+    self.overtime_violationHist.append(avg_overtime_violation)
     
     for j in self.particles:
       j.update_velocity(self.gBest,self.w,self.c1,self.c2) 
   
   def plot_cost(self):
+    plt.subplot(3,1,1)
     plt.plot(self.gBestCostHistory,'b-',linewidth=3,label ='Best Fitness')
     plt.xlabel('Iteration')
     plt.ylabel('Cost')
+    plt.subplot(3,1,2)
+    plt.plot(self.averagetotalViolatioHist,'r-',linewidth=3,label='total avg Violations')
+    plt.xlabel('Iterations')
+    plt.ylabel("# of violations")
+    plt.subplot(3,1,3)
+    plt.plot(self.skill_lvl_violationHist,'o-',linewidth= 2,label='skill lvl violations')
+    plt.plot(self.skill_violationHist,'g-',linewidth = 2, label= 'Skill Violations')
+    plt.plot(self.deadline_violationHist,'r-',linewidth = 2 , label='Deadline Violation')
+    plt.plot(self.overtime_violationHist,'b-',linewidth = 2 , label = 'Overtime Violation')
+    plt.xlabel('Iterations')
+    plt.ylabel('# of violations')
     plt.show()
 
 
-
-Swarm = Particle_Swarm_Optimiser(25,0.3,2,3,n_iter=25)
+E,T = DS.Generate_data(['A','B','C','D','E','F','G'],10,18)
+Swarm = Particle_Swarm_Optimiser(25,0.3,2,3,E,T,n_iter=100)
 Swarm.plot_cost()
 print(f'gBest = {Swarm.gBest}')
