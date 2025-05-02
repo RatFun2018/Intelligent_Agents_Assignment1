@@ -15,26 +15,26 @@ import matplotlib.pyplot as plt
 import copy
 
 # === Sample Employee & Task Data ===
-E1 = {"Hours": 10, "Skill_lvl": 4, "Skills": ['A', 'C'], "Assigned Tasks": {}}
-E2 = {"Hours": 12, "Skill_lvl": 6, "Skills": ['A', 'B', 'C'], "Assigned Tasks": {}}
-E3 = {"Hours": 8, "Skill_lvl": 3, "Skills": ['A'], "Assigned Tasks": {}}
-E4 = {"Hours": 15, "Skill_lvl": 7, "Skills": ['B', 'C'], "Assigned Tasks": {}}
-E5 = {"Hours": 9, "Skill_lvl": 5, "Skills": ['A', 'C'], "Assigned Tasks": {}}
+# E1 = {"Hours": 10, "Skill_lvl": 4, "Skills": ['A', 'C'], "Assigned Tasks": {}}
+# E2 = {"Hours": 12, "Skill_lvl": 6, "Skills": ['A', 'B', 'C'], "Assigned Tasks": {}}
+# E3 = {"Hours": 8, "Skill_lvl": 3, "Skills": ['A'], "Assigned Tasks": {}}
+# E4 = {"Hours": 15, "Skill_lvl": 7, "Skills": ['B', 'C'], "Assigned Tasks": {}}
+# E5 = {"Hours": 9, "Skill_lvl": 5, "Skills": ['A', 'C'], "Assigned Tasks": {}}
 
-Employees = [E1, E2, E3, E4, E5]
+# Employees = [E1, E2, E3, E4, E5]
 
-T1 = {"Estimated Time": 4, "Difficulty": 3, "Deadline": 8, "Skills": 'A'}
-T2 = {"Estimated Time": 6, "Difficulty": 5, "Deadline": 12, "Skills": 'B'}
-T3 = {"Estimated Time": 2, "Difficulty": 2, "Deadline": 6, "Skills": 'A'}
-T4 = {"Estimated Time": 5, "Difficulty": 4, "Deadline": 10, "Skills": 'C'}
-T5 = {"Estimated Time": 3, "Difficulty": 1, "Deadline": 7, "Skills": 'A'}
-T6 = {"Estimated Time": 8, "Difficulty": 6, "Deadline": 15, "Skills": 'B'}
-T7 = {"Estimated Time": 4, "Difficulty": 3, "Deadline": 9, "Skills": 'C'}
-T8 = {"Estimated Time": 7, "Difficulty": 5, "Deadline": 14, "Skills": 'B'}
-T9 = {"Estimated Time": 2, "Difficulty": 2, "Deadline": 5, "Skills": 'A'}
-T10 = {"Estimated Time": 6, "Difficulty": 4, "Deadline": 11, "Skills": 'C'}
+# T1 = {"Estimated Time": 4, "Difficulty": 3, "Deadline": 8, "Skills": 'A'}
+# T2 = {"Estimated Time": 6, "Difficulty": 5, "Deadline": 12, "Skills": 'B'}
+# T3 = {"Estimated Time": 2, "Difficulty": 2, "Deadline": 6, "Skills": 'A'}
+# T4 = {"Estimated Time": 5, "Difficulty": 4, "Deadline": 10, "Skills": 'C'}
+# T5 = {"Estimated Time": 3, "Difficulty": 1, "Deadline": 7, "Skills": 'A'}
+# T6 = {"Estimated Time": 8, "Difficulty": 6, "Deadline": 15, "Skills": 'B'}
+# T7 = {"Estimated Time": 4, "Difficulty": 3, "Deadline": 9, "Skills": 'C'}
+# T8 = {"Estimated Time": 7, "Difficulty": 5, "Deadline": 14, "Skills": 'B'}
+# T9 = {"Estimated Time": 2, "Difficulty": 2, "Deadline": 5, "Skills": 'A'}
+# T10 = {"Estimated Time": 6, "Difficulty": 4, "Deadline": 11, "Skills": 'C'}
 
-Tasks = [T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
+# Tasks = [T1, T2, T3, T4, T5, T6, T7, T8, T9, T10]
 
 
 # === Penalty Weights (from spec) ===
@@ -153,6 +153,10 @@ class GeneticAlgorithm:
         plt.grid(True)
         plt.show()
 
+
+Employees, Tasks = DS.Generate_data(['A','B','C','D','E'],5,10)
+
+
 # === Run Genetic Algorithm ===
 GA = GeneticAlgorithm(Employees, Tasks, pop_size=20, generations=25, mutation_rate=0.2)
 GA.evolve()
@@ -160,3 +164,7 @@ print(f"\nBest assignment (task → employee): {GA.best.assignment}")
 print(f"Best cost: {GA.best.cost:.2f}")
 
 GA.plot_cost()
+
+# Employees, Tasks = DS.Generate_data(['A','B','C','D','E'],5,10)
+# GA = AntColonyOptimser(5,1,0.8,0.02,Ant_employees,Ant_Tasks)
+# A.plot_cost()
