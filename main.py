@@ -21,6 +21,16 @@ if __name__ == "__main__":              # Main execution block
     PSOAlgorithm.plot_cost()            # Plot all three performance evaluations: solution quality, memory usage, and constraint violations
 
     # Running Ant Colony Optimization (ACO) for task assignment optimization
-    ACOAlgorithm = ACO.AntColonyOptimser(5, 0.8, 0.02, Employees, Tasks, n_iter=500)
+    ACOAlgorithm = ACO.AntColonyOptimser(25, 0.8, 0.02, Employees, Tasks, n_iter=500)
     # Plot the performance evaluations of the Ant Colony Optimization (ACO)
     ACOAlgorithm.plot_cost()             # Plot all three performance evaluations: solution quality, memory usage, and constraint violations
+
+    #comparison plotting between the algorithms 
+    fig, axs = plt.subplots(2,2)
+
+    axs[0,0].plot(GeneticAlgorithm.best_costs,'b-',label='GA')
+    axs[0,0].plot(PSOAlgorithm.gBestCostHistory,'r-',label='PSO')
+    axs[0,0].plot(ACOAlgorithm.cost_history,'g-',label='ACO')
+    axs[0,0].legend(loc='upper left')
+
+    plt.show()
