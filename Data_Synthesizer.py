@@ -24,7 +24,7 @@ def Generate_data(availableskills,numemployees=10,numTasks=15):
 
     return Employees,Tasks
 
-#E,T = Generate_data(['A','B','C','D','E'])
+#E,T = Generate_data(['A','B','C','D','E'],5,10)
 #print(E)
 #print(T)
     
