@@ -13,6 +13,7 @@ T1={"Estimated Time":2,"Difficulty":2,"Deadline":5,"Skills":'A'}
 T2={"Estimated Time":3,"Difficulty":2,"Deadline":7,"Skills":'C'}
 T3={"Estimated Time":4,"Difficulty":2,"Deadline":4,"Skills":'B'}
 Tasks = [T1,T2,T3]
+
 class Particle:
   def __init__(self,Employees,Tasks):
     self.Employees= Employees
@@ -258,7 +259,9 @@ class Particle_Swarm_Optimiser:
     plt.show()
 
 
-E,T = DS.Generate_data(['A','B','C','D','E','F','G'],10,18)
-Swarm = Particle_Swarm_Optimiser(25,0.3,2,3,E,T,n_iter=100)
-Swarm.plot_cost()
-print(f'gBest = {Swarm.gBest}')
+# E,T = DS.Generate_data(['A','B','C','D','E','F','G'],10,18)
+# Swarm = Particle_Swarm_Optimiser(25,0.3,2,3,E,T,n_iter=100)
+
+
+# Swarm.plot_cost()
+# print(f'gBest = {Swarm.gBest}')
